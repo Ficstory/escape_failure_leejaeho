@@ -8,43 +8,42 @@ for tc in range(1, T+1):
     elec_bus_stop = [0] + input_1 + [N]
     # 연산이 쉽도록 출발지와 도착지를 추가로 리스트에 넣어줌
 
+    fail = False
+    # K값보다 각 거리가 먼 정류장이 있으면 애초에 집에못감
+    for j in range(len(elec_bus_stop) - 1):
+        if elec_bus_stop[j+1] - elec_bus_stop[j] > K:
+            fail = True
+            break
+
+    if fail:
+        # fail 이 true면
+        print(f'#{tc} 0')
+        # 0을 출력하고 다음 테케로
+        continue
+
     charge_cnt = 0
     # 충전횟수 기록 변수
     i = 0
-    # 버스의 진행상황 기록 변수
-    remain = K
-    # 충전없이 갈 수 있는 남은 거리
+    # 버스의 진행상황 기록 변수(충전소가 있는 버정 인덱스)
+   
+    while i < len(elec_bus_stop) - 1:
+    # 현재 위치(i)에서 K만큼 갔을 때, 갈 수 있는 가장 먼 충전소의 인덱스를 찾음
+        farthest_stop_idx = i
+        for j in range(i + 1, len(elec_bus_stop)):
+            # 현재 위치에서 j번째 충전소까지의 거리가 K 이하인 경우
+            if elec_bus_stop[j] - elec_bus_stop[i] <= K:
+                # 갈 수 있는 곳이므로, 가장 먼 곳의 인덱스를 갱신
+                farthest_stop_idx = j
+            else:
+                # K를 초과하면 더 이상 갈 수 없으므로 탐색 중단
+                break
 
-    while True:
-        # 충전소 있는 마지막 정류장에 도착할때까지 반복
-        i += 1
-        # 일단 갑니다.
-        remain = remain - (elec_bus_stop[i]-elec_bus_stop[i-1])
-        # 가고나서 남은 연료 체크
-        if i == M:
-            # 만약에 마지막 충전소에 도착했으면
-            if remain >= N - elec_bus_stop[M-1]:
-                # 남은 거리가 종점까지까지 가는것보다 가까우면 충전없이 ㄱ
-                break
-            elif remain < N - elec_bus_stop[M-1]:
-                # 남은 거리가 종점까지 가는것 보다 짧으면 충전하고 ㄱ
-                charge_cnt += 1
-                if K < N - elec_bus_stop[M-1]:
-                    charge_cnt = 0
-                break
-        elif elec_bus_stop[i+1]-elec_bus_stop[i] > K:
-            # 다음 충전소 까지 거리가 한번 충전해서 가는 거 보다 길면
-            # 집에 못간다..
-            charge_cnt = 0
+        # 가장 멀리 갈 수 있는 곳이 종점(N)이라면, 더 이상 충전할 필요 없음
+        if farthest_stop_idx == len(elec_bus_stop) - 1:
             break
-        else:
-            # n번째 충전소에 도달
-            # 만약에 다음 정류장까지 거리가 갈수 있는 거리와 같거나 짧으면
-            if remain < elec_bus_stop[i+1] - elec_bus_stop[i]:
-            # 만약에 다음 정류장까지 거리가 갈수 있는 거리보다 멀면
-                charge_cnt += 1
-                remain = K
-                if remain < 0:
-                    i -= 1
+            
+        # 반례 다 통과하면 가장 멀리 갈 수 있는 충전소로 이동하여 충전
+        i = farthest_stop_idx
+        charge_cnt += 1
 
     print(f'#{tc} {charge_cnt}')
